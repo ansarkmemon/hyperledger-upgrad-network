@@ -1,0 +1,93 @@
+Organizations:
+  - &OrdererOrg
+    Name: OrderingService
+    ID: OrdererMSP
+    MSPDir: crypto-config/ordererOrganizations/upgrad-network.com/msp
+
+  - &Amazon
+    Name: AmazonMSP
+    ID: AmazonMSP
+    MSPDir: crypto-config/peerOrganizations/amazon.upgrad-network.com/msp
+    AnchorPeers:
+      - Host: peer0.amazon.upgrad-network.com
+        Port: 7051
+
+  - &Flipkart
+    Name: FlipkartMSP
+    ID: FlipkartMSP
+    MSPDir: crypto-config/peerOrganizations/flipkart.upgrad-network.com/msp
+    AnchorPeers:
+      - Host: peer0.flipkart.upgrad-network.com
+        Port: 9051
+
+  - &PayTM
+    Name: PayTMMSP
+    ID: PayTMMSP
+    MSPDir: crypto-config/peerOrganizations/paytm.upgrad-network.com/msp
+    AnchorPeers:
+      - Host: peer0.paytm.upgrad-network.com
+        Port: 11051
+
+
+
+#Capabilities
+
+Capabilities:
+  Global: &ChannelCapabilities
+    V1_1: true
+  Orderer: &OrdererCapabilities
+    V1_1: true
+  Application: &ApplicationCapabilities
+    V1_2: true
+
+#Application
+
+Application: &ApplicationDefaults
+  Organizations:
+
+#Orderer
+Orderer: &OrdererDefaults
+
+  OrdererType: solo
+  Addresses:
+    - orderer.upgrad-network.com:7050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Kafka:
+    Brokers: 
+      - 127.0.0.1:9092
+
+  Organizations:
+
+
+
+#Profiles
+Profiles:
+    OrdererGenesis:
+      Capabilities:
+        <<: *ChannelCapabilities
+      Orderer:
+        <<: *OrdererDefaults
+        Organizations:
+          - *OrdererOrg
+        Capabilities:
+          <<: *OrdererCapabilities
+      Consortiums:
+        SampleConsortium:
+          Organizations:
+            - *Amazon
+            - *Flipkart
+            - *PayTM
+    ChannelThreeOrgs:
+      Consortium: SampleConsortium
+      Application:
+        <<: *ApplicationDefaults
+        Organizations:
+          - *Amazon
+          - *Flipkart
+          - *PayTM
+        Capabilities:
+          <<: *ApplicationCapabilities
